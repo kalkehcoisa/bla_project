@@ -1,4 +1,5 @@
 def test_register_new_user(client):
+    """Register a new user successfully."""
     response = client.post(
         "/api/v1/auth/register",
         json={"email": "new@example.com", "full_name": "New User", "password": "password123"},
@@ -10,11 +11,13 @@ def test_register_new_user(client):
 
 
 def test_register_duplicate_email_fails(client, registered_user):
+    """Reject registration when the email is already registered."""
     response = client.post("/api/v1/auth/register", json=registered_user)
     assert response.status_code == 400
 
 
 def test_login_success(client, registered_user):
+    """Authenticate a registered user with valid credentials."""
     response = client.post(
         "/api/v1/auth/login",
         data={"username": registered_user["email"], "password": registered_user["password"]},
@@ -24,6 +27,7 @@ def test_login_success(client, registered_user):
 
 
 def test_login_wrong_password_fails(client, registered_user):
+    """Reject login attempts with an incorrect password."""
     response = client.post(
         "/api/v1/auth/login",
         data={"username": registered_user["email"], "password": "wrong-password"},
@@ -32,5 +36,6 @@ def test_login_wrong_password_fails(client, registered_user):
 
 
 def test_protected_route_requires_token(client):
+    """Require authentication for protected routes."""
     response = client.get("/api/v1/users/me")
     assert response.status_code == 401

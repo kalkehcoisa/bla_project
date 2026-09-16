@@ -1,3 +1,5 @@
+"""Database model for application users."""
+
 from sqlalchemy import Boolean, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -5,6 +7,8 @@ from app.db.session import Base
 
 
 class User(Base):
+    """Represent a user who can own and be assigned tasks."""
+
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)

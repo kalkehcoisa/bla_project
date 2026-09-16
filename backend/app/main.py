@@ -1,3 +1,6 @@
+"""Application entrypoint and FastAPI configuration."""
+
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -6,6 +9,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.router import api_router
 from app.core.config import settings
 from app.db.init_db import init_db
+
+logger = logging.getLogger(__name__)
 
 try:
     from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -18,8 +23,12 @@ except ImportError:  # pragma: no cover
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """Initialize application resources during startup."""
+    logger.info("Initializing application database")
     init_db()
+    logger.info("Application startup complete")
     yield
+    logger.info("Application shutdown complete")
 
 
 app = FastAPI(
@@ -48,4 +57,6 @@ app.include_router(api_router, prefix=settings.API_V1_PREFIX)
 
 @app.get("/health", tags=["health"])
 def health_check():
+    """Return the application's health status."""
+    logger.debug("Health check requested")
     return {"status": "ok"}

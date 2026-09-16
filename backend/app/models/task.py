@@ -1,4 +1,7 @@
+"""SQLAlchemy models for task management."""
+
 import enum
+import logging
 from datetime import date, datetime, timezone
 
 from sqlalchemy import Date, DateTime, Enum, ForeignKey, String, Text
@@ -6,14 +9,20 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.session import Base
 
+logger = logging.getLogger(__name__)
+
 
 class TaskStatus(str, enum.Enum):
+    """Lifecycle states available for a task."""
+
     PENDING = "pending"
     IN_PROGRESS = "in_progress"
     DONE = "done"
 
 
 class Task(Base):
+    """A task owned by a user and optionally assigned to another user."""
+
     __tablename__ = "tasks"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)

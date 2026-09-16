@@ -1,3 +1,5 @@
+"""Shared pytest fixtures for the backend test suite."""
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -18,12 +20,14 @@ TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engin
 
 @pytest.fixture(autouse=True)
 def _setup_db():
+    """Create the test database schema before each test and remove it afterward."""
     Base.metadata.create_all(bind=engine)
     yield
     Base.metadata.drop_all(bind=engine)
 
 
 def override_get_db():
+    """Provide a database session backed by the in-memory test database."""
     db = TestingSessionLocal()
     try:
         yield db
@@ -36,12 +40,14 @@ app.dependency_overrides[get_db] = override_get_db
 
 @pytest.fixture
 def client():
+    """Provide a FastAPI test client."""
     with TestClient(app) as c:
         yield c
 
 
 @pytest.fixture
 def registered_user(client):
+    """Register and return a test user's credentials."""
     payload = {
         "email": "jayme@example.com",
         "full_name": "Jayme Tosi",
@@ -53,6 +59,7 @@ def registered_user(client):
 
 @pytest.fixture
 def auth_headers(client, registered_user):
+    """Return authorization headers for the registered test user."""
     response = client.post(
         "/api/v1/auth/login",
         data={"username": registered_user["email"], "password": registered_user["password"]},

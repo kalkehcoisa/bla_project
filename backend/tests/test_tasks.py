@@ -1,10 +1,12 @@
 def _create_task(client, headers, **overrides):
+    """Create a task using default fields and any supplied overrides."""
     payload = {"title": "Sample task", "description": "Do the thing"}
     payload.update(overrides)
     return client.post("/api/v1/tasks/", json=payload, headers=headers)
 
 
 def test_create_task(client, auth_headers):
+    """Verify that a task can be created with a pending status."""
     response = _create_task(client, auth_headers)
     assert response.status_code == 201
     data = response.json()
@@ -13,6 +15,7 @@ def test_create_task(client, auth_headers):
 
 
 def test_list_tasks_returns_paginated_page(client, auth_headers):
+    """Verify that tasks are returned in a paginated response."""
     for i in range(3):
         _create_task(client, auth_headers, title=f"Task {i}")
 
@@ -26,6 +29,7 @@ def test_list_tasks_returns_paginated_page(client, auth_headers):
 
 
 def test_filter_tasks_by_status(client, auth_headers):
+    """Verify that tasks can be filtered by status."""
     created = _create_task(client, auth_headers, title="To finish").json()
     client.patch(
         f"/api/v1/tasks/{created['id']}",
@@ -41,6 +45,7 @@ def test_filter_tasks_by_status(client, auth_headers):
 
 
 def test_filter_tasks_by_due_date(client, auth_headers):
+    """Verify that tasks can be filtered by due date."""
     _create_task(client, auth_headers, title="Due soon", due_date="2026-10-01")
     _create_task(client, auth_headers, title="Due later", due_date="2026-11-01")
 
@@ -51,6 +56,7 @@ def test_filter_tasks_by_due_date(client, auth_headers):
 
 
 def test_update_task(client, auth_headers):
+    """Verify that an existing task can be updated."""
     created = _create_task(client, auth_headers).json()
     response = client.patch(
         f"/api/v1/tasks/{created['id']}",
@@ -62,6 +68,7 @@ def test_update_task(client, auth_headers):
 
 
 def test_complete_task(client, auth_headers):
+    """Verify that a task can be marked as complete."""
     created = _create_task(client, auth_headers).json()
     response = client.post(f"/api/v1/tasks/{created['id']}/complete", headers=auth_headers)
     assert response.status_code == 200
@@ -69,6 +76,7 @@ def test_complete_task(client, auth_headers):
 
 
 def test_delete_task(client, auth_headers):
+    """Verify that a deleted task is no longer available."""
     created = _create_task(client, auth_headers).json()
     response = client.delete(f"/api/v1/tasks/{created['id']}", headers=auth_headers)
     assert response.status_code == 204
@@ -78,11 +86,13 @@ def test_delete_task(client, auth_headers):
 
 
 def test_get_nonexistent_task_returns_404(client, auth_headers):
+    """Verify that requesting a nonexistent task returns not found."""
     response = client.get("/api/v1/tasks/9999", headers=auth_headers)
     assert response.status_code == 404
 
 
 def test_task_owner_can_assign_to_other_user(client, auth_headers):
+    """Verify that a task owner can assign a task to another user."""
     other = client.post(
         "/api/v1/auth/register",
         json={"email": "assignee@example.com", "full_name": "Assignee", "password": "pass1234"},
