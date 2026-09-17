@@ -115,35 +115,28 @@ This project was built with Claude (Anthropic) as the GenAI pair-programming too
 
 The scaffolding prompt (paraphrased from the actual session) was:
 
-> Build a FastAPI backend for a task management API: JWT auth, CRUD for tasks,
-> assignment to users, filtering by status and due date, pagination, rate limiting,
-> and a Celery+Redis background job triggered when a task is completed. Structure it
-> with a clear separation between HTTP routes, data access, and schemas. Add pytest
-> tests for the critical endpoints with coverage reporting. Then build a React (Vite)
-> frontend that consumes it: login/register, a task list with filters and pagination,
-> a create/edit form, and complete/delete actions. Finish with Dockerfiles, a
-> docker-compose.yml wiring Postgres/Redis/API/worker/frontend together, and a README.
+"Hello Claude!
+I need to implement a project for a selection process. It asks to use GenAI btw.
+It's to build a FastAPI application with a React frontend following the pasted specifications."
+Attached/pasted the copy of the project specifications.
 
-Follow-up prompts refined specific pieces (e.g. "make the Celery call fail silently if the broker is unreachable", "add ownership checks so only the owner or assignee can modify a task").
+Very simple, yet, for small tasks/projects, tends to be very effective.
+Now, if I had to be more strict, than I would place every design/architectural decisions, technologies, libraries, approaches, where I want things to be placed, all the DONOTs and examples, if appliable.
+Well, also I would try to keep the instructions as short as possible. Not only about tokens, but the more extensive they are, the more the AI doesn't follow/distort them and hallucinates.
 
-### Validating the output
+
+### Validating the output and corrections
 
 Every generated piece was actually run, not just read:
 
 - The backend was installed into a real virtualenv and the full pytest suite was executed (`14 passed`, ~92% coverage) before moving on.
 - The frontend was installed with `npm install` and built with `npm run build` to catch import/syntax errors before treating it as done.
+- Did a code read through, trying to catch problems and understand the code
+- Checked the test suite
+- Used the system to see it working and did some fixes like:
+  - adding a start/stop button to make the Pending status. It made the system look more like users managing tasks
+  - added filtering in list_tasks to only return the ones owned or assigned to the user requesting them
 
-### Corrections made to the AI-generated code
-
-Running the code surfaced three real issues that a "looks correct" read-through
-would have missed:
-
-1. **`pydantic.EmailStr` failed at import time** — Pydantic v2 requires the optional `email-validator` dependency. Fixed by adding `pydantic[email]` instead of bare `pydantic`.
-2. **`passlib` + modern `bcrypt` incompatibility** — `passlib 1.7.4` calls a `bcrypt` internal attribute that was removed in `bcrypt>=4.1`, causing password hashing to raise at runtime. Pinned `bcrypt==4.0.1`, a known-compatible version, rather than patching around it.
-3. **Deprecated `@app.on_event("startup")`** — still functional but flagged as deprecated by FastAPI; replaced with the `lifespan` context-manager pattern.
-
-None of these were "hallucinated" APIs — they were real dependency-version interactions that only show up when the code is actually executed, which is why running the test suite (rather than just reading the diff) was part of the process.
-(See also [`presentation/ANTICIPATED_QA.md`](../presentation/ANTICIPATED_QA.md#genai-usage) for the condensed talking-point version of this section.)
 
 ### Edge cases and validation handled
 

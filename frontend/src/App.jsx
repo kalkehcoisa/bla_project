@@ -59,6 +59,16 @@ export default function App() {
     }
   };
 
+  const handleStart = async (task) => {
+    await api.updateTask(token, task.id, { status: "in_progress" });
+    loadTasks();
+  };
+
+  const handleStop = async (task) => {
+    await api.updateTask(token, task.id, { status: "pending" });
+    loadTasks();
+  };
+
   const handleComplete = async (task) => {
     await api.completeTask(token, task.id);
     loadTasks();
@@ -109,6 +119,8 @@ export default function App() {
             tasks={tasks}
             users={users}
             onEdit={setEditingTask}
+            onStart={handleStart}
+            onStop={handleStop}
             onComplete={handleComplete}
             onDelete={handleDelete}
           />

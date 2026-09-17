@@ -4,7 +4,7 @@ const STATUS_LABELS = {
   done: "Done",
 };
 
-export default function TaskList({ tasks, users, onEdit, onComplete, onDelete }) {
+export default function TaskList({ tasks, users, onEdit, onStart, onStop, onComplete, onDelete }) {
   const userName = (id) => users.find((u) => u.id === id)?.full_name || "Unassigned";
 
   if (tasks.length === 0) {
@@ -25,6 +25,16 @@ export default function TaskList({ tasks, users, onEdit, onComplete, onDelete })
             </div>
           </div>
           <div className="task-actions">
+            {task.status === "pending" && (
+              <button type="button" onClick={() => onStart(task)}>
+                Start
+              </button>
+            )}
+            {task.status === "in_progress" && (
+              <button type="button" className="secondary" onClick={() => onStop(task)}>
+                Stop
+              </button>
+            )}
             {task.status !== "done" && (
               <button type="button" onClick={() => onComplete(task)}>
                 Mark done

@@ -54,6 +54,20 @@ if HAS_SLOWAPI:
 
 app.include_router(api_router, prefix=settings.API_V1_PREFIX)
 
+@app.get("/", tags=["home"])
+def home():
+    return {
+        "name": settings.PROJECT_NAME,
+        "docs": "/docs",
+        "redoc": "/redoc",
+        "openapi": f"{settings.API_V1_PREFIX}/openapi.json",
+        "health": "/health",
+        "endpoints": {
+            "auth": f"{settings.API_V1_PREFIX}/auth",
+            "users": f"{settings.API_V1_PREFIX}/users",
+            "tasks": f"{settings.API_V1_PREFIX}/tasks",
+        },
+    }
 
 @app.get("/health", tags=["health"])
 def health_check():

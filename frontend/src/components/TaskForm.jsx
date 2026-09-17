@@ -48,6 +48,8 @@ export default function TaskForm({ users, initialTask, onSubmit, onCancel }) {
           Due date
           <input type="date" value={form.due_date} onChange={handleChange("due_date")} />
         </label>
+      </div>
+      <div className="form-row">
         <label>
           Assignee
           <select value={form.assignee_id} onChange={handleChange("assignee_id")}>
